@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint . --ext .js --ext .jsx --cache || true",
-    "server": "json-server --watch db.json --routes routes.json --port 3004",
+    "server": "json-server --watch db.json --routes routes.json --port 3005",
     "start": "webpack-dev-server",
     "test": "mocha --opts ./test/mocha.opts test/tests.js"
   },

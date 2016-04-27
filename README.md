@@ -148,7 +148,7 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   ```jsx
   import axios from 'axios'
 
-  axios.get('http://localhost:3004/topics/1/cards/4')
+  axios.get('http://localhost:3005/topics/1/cards/4')
     .then((resp) => console.log(resp))
     .catch((err) => console.log(err))
   ```
