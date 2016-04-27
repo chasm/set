@@ -118,7 +118,7 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   }
   ```
 
-  We have a `topics` collection with one topic so far, and an associated `cards` collection. Each card represents a flash card. It has a "word" to display on one side of the card, and both a definition and an example to display on the flip side.
+  We have a `topics` collection with one topic so far, and an associated `cards` collection. Each card represents a flash card. It has a **word** to display on one side of the card, and both a **definition** and an **example** to display on the flip side.
 
 3. By default, `json-server` will only nest routes one level deep. We want to go two: down to the individual card, e.g., `/topics/1/cards/3`. We can do this by adding a `routes.json` file and specifying an alias to a filtered route, thus:
 
