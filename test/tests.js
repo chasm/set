@@ -12,10 +12,10 @@ chai.use(chaiEnzyme())
 import { shallow } from 'enzyme'
 import { createStore } from 'redux'
 
-import App from '../app/components/app.jsx'
-import Header from '../app/components/header.jsx'
+import { App } from '../src/containers'
+import { Header } from '../src/components'
 
-import reducer from '../app/reducer.js'
+import reducer from '../src/redux/modules/reducer'
 
 describe('<App/>', () => {
   it('includes the Header', () => {

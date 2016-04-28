@@ -182,7 +182,7 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
 
 
   ```jsx
-  // app/components/topic.jsx (formerly about.jsx)
+  // app/components/card.jsx
   import React from 'react'
 
   import { Col, Row } from 'react-bootstrap'
@@ -217,15 +217,15 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   </LinkContainer>
   ```
 
-7. Before we move on to creating our app, let's finish setting up our actions and test our current reducer. Then we'll build on that. We'll begin by creating a button on the home page that will increment our counter. We can use a Bootstrap button and update the `/app/components/home.jsx` file like so:
+7. Before we move on to creating our app, let's finish setting up our actions and test our current reducer. Then we'll build on that. We'll begin by creating a button on the Topic page that will increment our counter. We can use a Bootstrap button and update the `/app/components/topic.jsx` file like so:
 
   ```js
-  // in app/components/home.jsx
+  // in app/components/topic.jsx
   import { Button, Col, Row } from 'react-bootstrap'
 
-  const Home = () => <Row>
+  const Topic = () => <Row>
     <Col xs={12}>
-      <h1>Home</h1>
+      <h1>Topic</h1>
       <Button>+</Button>
     </Col>
   </Row>
@@ -319,6 +319,25 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   import { App, Topic } from './containers'
 
   import reducer from './redux/modules/reducer'
+  ```
+
+  And in our `test/tests.js` file, change this:
+
+  ```js
+  THIS IS THE OLD VERSION
+  import App from '../app/components/app.jsx'
+  import Header from '../app/components/header.jsx'
+
+  import reducer from '../app/reducer.js'
+  ```
+
+  to this:
+
+  ```js
+  import { App } from '../src/containers'
+  import { Header } from '../src/components'
+
+  import reducer from '../src/redux/modules/reducer'
   ```
 
   It's a bit nicer, isn't it? We'll clean this up still more later.
@@ -433,4 +452,235 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
     : merge(common, buildConfig)
 
   export default config
+  ```
+
+12. Wow! It's like a whole new app. Until we run it, that is. Then it looks the same as the old app. To test it, run our scripts:
+
+  ```sh
+  npm run lint
+  npm run build
+  npm test
+  npm start
+  ```
+
+  Then check it out at [http://localhost:8080/](http://localhost:8080/) and make sure everything still works.
+
+13. So let's move on. We want output the current state of the counter below the INCREMENT button on the Topic page. How can we get hold of this state? First, we can add a count line like this to `/src/containers/topic/topic.js`:
+
+  ```jsx
+  <Col xs={12}>
+    <h1>Topic</h1>
+    <Button>+</Button>
+    <p>The count is {count}.</p>
+  </Col>
+  ```
+
+  Of course, that won't work yet because there is no `count`. So how do we get that from the store? Well, one way is to grab it from the context. In `/src/client.js` we put it in the context using the `<Provider />` component. Now we can change our `<Topic />` component to grab that store and get it's state. The simplest way is like this:
+
+  ```jsx
+  // src/containers/topic/topic.js
+  import React, { PropTypes } from 'react'
+
+  import { Button, Col, Row } from 'react-bootstrap'
+
+  const Topic = ({}, { store }) => {
+    const { count } = store.getState().reducer
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Topic</h1>
+        <Button>+</Button>
+        <p>The count is {count}.</p>
+      </Col>
+    </Row>
+  }
+
+  Topic.contextTypes = {
+    store: PropTypes.object.isRequired
+  }
+
+  export default Topic
+  ```
+
+14. Now we want to have a click of the button increment the count. We can do this by dispatching an `INCREMENT` action to the store:
+
+  ```jsx
+  const Topic = ({}, { store }) => {
+    const { count } = store.getState().reducer
+
+    const incrementCount = () => store.dispatch({ type: 'INCREMENT' })
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Topic</h1>
+        <Button onClick={incrementCount}>+</Button>
+        <p>The count is {count}.</p>
+      </Col>
+    </Row>
+  }
+  ```
+
+  Very nice. So now we can click on the button, and we'll see the count change in the store by viewing the wonderful DockMonitor. But there's a problem: the count changes in the store, but the Topic page is not updated to reflect the new count. This is because the Topic component is not aware that the state of the app has changed. What we'd really like to do is to supply that count to the Topic component as a prop. That way when it changed, the prop would change and the Topic component would re-render. And if we passed the `dispatch` method in as a prop as well, then we could still call it with our action.
+
+  This is what a `container` is: it's a component wrapped in another component that does nothing but pull the store out of the context and use it to pass props to the wrapped component. And `react-redux` provides a method for this called `connect`. It takes two parameters&mdash;a `mapStateToProps` function that takes the state from the store and maps whatever parts we need to the props of the wrapped component, and `mapDispatchToProps` which does the same thing for `dispatch`. The `connect` function returns another function. We pass in the component that we want to wrap, and we get back the container. It's easier than it sounds.
+
+15. If we're just passing the store's `dispatch` through unchanged, then `connect` will do it by default. We need to import `connect`. Then we can create our `mapStateToProps` function which will take the `state` and return an object with the props we want. Here, we just want the `reducer.count` from the state. Then we need to change our Topic component to take the `count` and `dispatcher` props that `connect` will pass in. We add the propTypes we need, then wrap the Topic in our TopicContaner and export the container instead:
+
+  ```js
+  // in src/containers/topic/topic.js
+  import React, { PropTypes } from 'react'
+
+  import { Button, Col, Row } from 'react-bootstrap'
+
+  import { connect } from 'react-redux'
+
+  const mapStateToProps = (state) => {
+    return {
+      count: state.reducer.count
+    }
+  }
+
+  const Topic = ({ count, dispatch }) => {
+    const incrementCount = () => dispatch({ type: 'INCREMENT' })
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Topic</h1>
+        <Button onClick={incrementCount}>+</Button>
+        <p>The count is {count}.</p>
+      </Col>
+    </Row>
+  }
+
+  Topic.propTypes = {
+    count: PropTypes.number.isRequired,
+    dispatch: PropTypes.func.isRequired
+  }
+
+  const TopicContainer = connect(mapStateToProps)(Topic)
+
+  export default TopicContainer
+  ```
+
+16. Now look how easy it is to add the DECREMENT action:
+
+  ```jsx
+  const Topic = ({ count, dispatch }) => {
+    const incrementCount = () => dispatch({ type: 'INCREMENT' })
+    const decrementCount = () => dispatch({ type: 'DECREMENT' })
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Topic</h1>
+        <Button onClick={incrementCount}>+</Button>
+        <p>The count is {count}.</p>
+        <Button onClick={decrementCount}>-</Button>
+      </Col>
+    </Row>
+  }
+  ```
+
+17. Ha, ha. Remember [redux-actions](https://github.com/acdlite/redux-actions)? Yeah, me neither. But we're going to use them now to create our action functions for us. First we'll import the `createAction` function:
+
+  ```js
+  // in app/containers/topic/topic.js
+  import { createAction } from 'redux-actions'
+  ```
+
+  Then we'll change our actions from this:
+
+  ```js
+  const incrementCount = () => dispatch({ type: 'INCREMENT' })
+  const decrementCount = () => dispatch({ type: 'DECREMENT' })
+  ```
+
+  To this:
+
+  ```js
+  const increment = createAction('INCREMENT')
+  const decrement = createAction('DECREMENT')
+
+  const incrementCount = () => dispatch(increment())
+  const decrementCount = () => dispatch(decrement())
+  ```
+
+18. Does it still work? It should. This may not seem like much of a savings, and in this simplified case it isn't. But if our actions took a payload&mdash;perhaps an amount to increment/decrement the count by, with the default being 1&mdash;then we could just pass that payload into the action functions, e.g. `increment(10)` to get back an action that looks like this:
+
+  ```js
+  {
+    type: 'INCREMENT',
+    payload: 10
+  }
+  ```
+
+  Try changing the callbacks to this:
+
+  ```js
+  const incrementCount = () => dispatch(increment(10))
+  const decrementCount = () => dispatch(decrement(5))
+  ```
+
+  Then adjust the `/src/redux/modules/reducer.js` file accordingly:
+
+  ```js
+  // in src/redux/modules/reducer.js
+  case INCREMENT:
+    return {
+      ...state,
+      count: state.count + (action.payload || 1)
+    }
+  case DECREMENT:
+    return {
+      ...state,
+      count: state.count - (action.payload || 1)
+    }
+  ```
+
+  Now when you click the increment button, the count should increase by 10, and when you click the decrement button, it should decrease by 5. And this can work even with very complex payloads.
+
+19. Let's move the action creators to the reducer file. We'll export them together. First, in `/src/client.js` change the import for the reducer to this:
+
+  ```js
+  import { reducer } from './redux/modules/reducer'
+  ```
+
+  Then move the `increment` and `decrement` functions and the import of `createActions` into the `/src/redux/modules/reducer.js` file, and export those and the reducer:
+
+  ```js
+  const INCREMENT = 'INCREMENT'
+  const DECREMENT = 'DECREMENT'
+
+  import { createAction } from 'redux-actions'
+
+  const increment = createAction(INCREMENT)
+  const decrement = createAction(DECREMENT)
+
+  const reducer = (state = { count: 0 }, action) => {
+    switch (action.type) {
+      case INCREMENT:
+        return {
+          ...state,
+          count: state.count + (action.payload || 1)
+        }
+      case DECREMENT:
+        return {
+          ...state,
+          count: state.count - (action.payload || 1)
+        }
+      default:
+        return state
+    }
+  }
+
+  export {
+    increment,
+    decrement,
+    reducer
+  }
+  ```
+
+  Finally, add the import to the Topic container file, `/src/containers/topic/topic.js`:
+
+  ```js
+  import { increment, decrement } from '../../redux/modules/reducer'
   ```

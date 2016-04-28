@@ -14,7 +14,9 @@ import './theme/main.css'
 import { Home } from './components'
 import { App, Topic } from './containers'
 
-import reducer from './redux/modules/reducer'
+import { reducer } from './redux/modules/reducer'
+
+console.log('reducer', reducer)
 
 const DevTools = createDevTools(
   <DockMonitor toggleVisibilityKey='ctrl-h' changePositionKey='ctrl-q'>
