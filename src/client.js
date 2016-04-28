@@ -16,8 +16,6 @@ import { App, Counter, Topic } from './containers'
 
 import { reducer } from './redux/modules/reducer'
 
-console.log('reducer', reducer)
-
 const DevTools = createDevTools(
   <DockMonitor toggleVisibilityKey='ctrl-h' changePositionKey='ctrl-q'>
     <LogMonitor theme='tomorrow' preserveScrollTop={false} />
