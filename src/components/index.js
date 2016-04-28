@@ -1,2 +1,2 @@
-export Header from './header/header'
-export Home from './home/home'
+export { default as Header } from './header/header'
+export { default as Home } from './home/home'

@@ -279,16 +279,16 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
 10. Next we'll need to fix our imports that are broken. Let's update our `index.js` files to make importing components, etc. a little easier. In `/src/components/index.js` put:
 
   ```js
-  export Header from './header/header'
-  export Home from './home/home'
+  export { default as Header } from './header/header'
+  export { default as Home } from './home/home'
   ```
 
   In `/src/containers/index.js` put:
 
   ```js
-  export App from './app/app'
-  export Card from './card/card'
-  export Topic from './topic/topic'
+  export { default as App } from './app/app'
+  export { default as Card } from './card/card'
+  export { default as Topic } from './topic/topic'
   ```
 
   In `/src/containers/app/app.js` change `import Header from './header.jsx'` to:
@@ -338,4 +338,99 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   entry: {
     main: './app/client.js'
   },
+  ```
+
+  Also, we need to update our PATHS. Change `app` to `src` everywhere except as the name of the build bundle. To make it clear, here's the entire updated `webpack.config.babel.js` file:
+
+  ```js
+  import webpack from 'webpack'
+  import path from 'path'
+  import merge from 'webpack-merge'
+  import stylelint from 'stylelint'
+
+  const TARGET = process.env.npm_lifecycle_event
+
+  process.env.BABEL_ENV = TARGET
+
+  const PATHS = {
+    src: path.join(__dirname, 'src'),
+    build: path.join(__dirname, 'build')
+  }
+
+  const common = {
+    entry: {
+      main: './src/client.js'
+    },
+    resolve: {
+      extensions: [ '', '.js', '.jsx' ]
+    },
+    output: {
+      path: PATHS.build,
+      filename: 'app.js'
+    },
+    externals: {
+      'jsdom': 'window',
+      'react/lib/ReactContext': 'window',
+      'react/lib/ExecutionEnvironment': true,
+      'react/addons': true
+    },
+    module: {
+      preLoaders: [
+        {
+          test: /\.css$/,
+          loaders: [ 'postcss' ],
+          include: PATHS.src
+        },
+        {
+          test: /\.jsx?$/,
+          loaders: [ 'eslint' ],
+          include: PATHS.src
+        }
+      ],
+      loaders: [
+        {
+          test: /\.css$/,
+          loaders: [ 'style', 'css', 'myth' ],
+          include: PATHS.src
+        },
+        {
+          test: /\.jsx?$/,
+          loaders: [ 'babel?cacheDirectory' ],
+          include: PATHS.src
+        }
+      ]
+    },
+    postcss: function () {
+      return [stylelint({
+        rules: {
+          'color-hex-case': 'lower'
+        }
+      })]
+    }
+  }
+
+  const startConfig = {
+    devtool: 'eval-source-map',
+    devServer: {
+      contentBase: PATHS.build,
+      historyApiFallback: true,
+      hot: true,
+      inline: true,
+      progress: true,
+      stats: 'errors-only',
+      host: process.env.HOST,
+      port: process.env.PORT
+    },
+    plugins: [
+      new webpack.HotModuleReplacementPlugin()
+    ]
+  }
+
+  const buildConfig = {}
+
+  const config = (TARGET === 'start' || !TARGET)
+    ? merge(common, startConfig)
+    : merge(common, buildConfig)
+
+  export default config
   ```

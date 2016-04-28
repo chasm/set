@@ -8,13 +8,13 @@ const TARGET = process.env.npm_lifecycle_event
 process.env.BABEL_ENV = TARGET
 
 const PATHS = {
-  app: path.join(__dirname, 'app'),
+  src: path.join(__dirname, 'src'),
   build: path.join(__dirname, 'build')
 }
 
 const common = {
   entry: {
-    main: './app/client.js'
+    main: './src/client.js'
   },
   resolve: {
     extensions: [ '', '.js', '.jsx' ]
@@ -34,24 +34,24 @@ const common = {
       {
         test: /\.css$/,
         loaders: [ 'postcss' ],
-        include: PATHS.app
+        include: PATHS.src
       },
       {
         test: /\.jsx?$/,
         loaders: [ 'eslint' ],
-        include: PATHS.app
+        include: PATHS.src
       }
     ],
     loaders: [
       {
         test: /\.css$/,
         loaders: [ 'style', 'css', 'myth' ],
-        include: PATHS.app
+        include: PATHS.src
       },
       {
         test: /\.jsx?$/,
         loaders: [ 'babel?cacheDirectory' ],
-        include: PATHS.app
+        include: PATHS.src
       }
     ]
   },
