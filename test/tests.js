@@ -15,7 +15,7 @@ import { createStore } from 'redux'
 import { App } from '../src/containers'
 import { Header } from '../src/components'
 
-import reducer from '../src/redux/modules/reducer'
+import { reducer } from '../src/redux/modules/reducer'
 
 describe('<App/>', () => {
   it('includes the Header', () => {

@@ -682,5 +682,177 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   Finally, add the import to the Topic container file, `/src/containers/topic/topic.js`:
 
   ```js
+  // in src/containers/topic/topic.js
   import { increment, decrement } from '../../redux/modules/reducer'
   ```
+
+  and update the import in the tests at `/test/test.js`:
+
+  ```js
+  // in test/tests.js
+  import { reducer } from '../src/redux/modules/reducer'
+  ```
+
+  Does it still work?
+
+20. OK, before we go any further, let's think about the shape our our app's state. But first, let's move the counter into it's own page so we can play with the Topic page. Copy the `topic.js` file into a new folder called `counter` and rename the file to `counter.js`, then change Topic to Counter:
+
+  ```js
+  // src/containers/counter/counter.js
+  import React, { PropTypes } from 'react'
+
+  import { Button, Col, Row } from 'react-bootstrap'
+
+  import { connect } from 'react-redux'
+
+  import { increment, decrement } from '../../redux/modules/reducer'
+
+  const mapStateToProps = (state) => {
+    return {
+      count: state.reducer.count
+    }
+  }
+
+  const Counter = ({ count, dispatch }) => {
+    const incrementCount = () => dispatch(increment(10))
+    const decrementCount = () => dispatch(decrement(5))
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Counter</h1>
+        <Button onClick={incrementCount}>+</Button>
+        <p>The count is {count}.</p>
+        <Button onClick={decrementCount}>-</Button>
+      </Col>
+    </Row>
+  }
+
+  Counter.propTypes = {
+    count: PropTypes.number.isRequired,
+    dispatch: PropTypes.func.isRequired
+  }
+
+  const CounterContainer = connect(mapStateToProps)(Counter)
+
+  export default CounterContainer
+  ```
+
+  Then add it to the `/src/containers/index.js` file:
+
+  ```js
+  // in /src/containers/index.js
+  export { default as Counter } from './counter/counter'
+  ```
+
+  To the `src/components/header/header.js` file:
+
+  ```jsx
+  // in src/components/header/header.js
+  <LinkContainer to={{ pathname: '/counter' }}>
+    <NavItem eventKey={3} href='#'>Counter</NavItem>
+  </LinkContainer>
+  ```
+
+  And update the `src/client.js` file, too:
+
+  ```js
+  // in src/client.js
+  import { App, Counter, Topic } from './containers'
+  ```
+
+  and:
+
+  ```jsx
+  // in src/client.js
+  <Route path='/' component={App}>
+    <IndexRoute component={Home}/>
+    <Route path='topic' component={Topic}/>
+    <Route path='counter' component={Counter}/>
+  </Route>
+  ```
+
+  And we'll restore Topic to its former glory:
+
+  ```jsx
+  // src/containers/topic/topic.js
+  import React from 'react'
+
+  import { Col, Row } from 'react-bootstrap'
+
+  const Topic = () => <Row>
+    <Col xs={12}>
+      <h1>Topic</h1>
+    </Col>
+  </Row>
+
+  export default Topic
+  ```
+
+  Now let's re-run everything to make sure it works:
+
+  ```sh
+  npm run lint
+  npm test
+  npm run build
+  npm start
+  ```
+
+21. Alrighty. State. Hmm.
+
+  So we want our app to allow us to run through a deck of "flash cards". For each card we're presented with a word or concept we want to memorize. Then we "flip" the card over and check whether we were right. It's too complicated to check automatically (though we could eventually have the user write her guesses down and then we could see how they improved over time). That might work for simple cards for memorizing, say, vocabulary. But for concepts it's just too difficult to program for such a simple app.
+
+  We also want the app to present the cards to us in some random order, maybe ten or twenty cards in a session. We loop through the cards repeatedly. After we've gotten a card right three times in a row, that card is retired. Now we could just do a shorter group until all cards are retired and that ends the session. Or we could pull in a new card each time we retire one until the entire topic is exhausted. Maybe this is a setting?
+
+  We'll also need to think about users. Is it one big set and each user sets up her own app? Or do we allow different users? If that's the case, we probably want to authenticate the user. Down the road, we could add administrative privileges and add the cards and topics via the interface. Or give the users the ability to add cards for themselves.
+
+  You can see where this could go. Users could develop their own sets of cards and make them public or keep them private. Users could rate each other's public sets. For people who like to memorize stuff&mdash;which, sadly, does not really include me&mdash;this could be a really fun and educational app.
+
+  But for our purposes, let's stick with simple for now. One user, one topic to start, maybe a dozen cards. We'll need to have a "word" for the "front" of the card, and a "definition" for the back. Maybe through in an "example". We need to have an `id` and a `topicId`. Then we'll need to track hits and misses. Here's an example from `db.json`.
+
+  ```json
+  {
+    "id": 1,
+    "topicId": 1,
+    "word": "Accumulation",
+    "definition": "Accumulation is derived from a Latin word which means 'pile up'. It is a stylistic device that is defined as a list of words which embody similar abstract or physical qualities or meanings with the intention to emphasize the common qualities that words hold. It is also an act of accumulating the scattered points. Accumulation examples are found in literary pieces and in daily conversations.",
+    "example": "Then shall our names,<br>Familiar in his mouth as household words,<br>Harry the King, Bedford and Exeter,<br>Warwick and Talbot, Salisbury and Gloucester,<br>Be in their flowing cups freshly remembered",
+    "misses": 0,
+    "hits": 0
+  }
+  ```
+
+  Later we'll probably want to move the hits and misses out to a separate collection, probably in the user or associated with the user. Maybe "views"? But I doubt we'll have time to get that far . . .
+
+  To start, let's work locally in the client. Then we'll persist the data and changes to the server, loading the initial data from there as well.
+
+  So let's copy the `db.json` file into an `initialState` constant in our `/src/redux/modules/reducer.js` file:
+
+  ```js
+  // in src/redux/modules/reducer.js
+  const initialState = {
+    topics: [
+      {
+        id: 1,
+        title: 'Literary Devices'
+      }
+    ],
+    cards: [
+      {
+        id: 1,
+        topicId: 1,
+        word: 'Accumulation',
+        definition: 'Accumulation is derived from a Latin word which means "pile up". It is a stylistic device that is defined as a list of words which embody similar abstract or physical qualities or meanings with the intention to emphasize the common qualities that words hold. It is also an act of accumulating the scattered points. Accumulation examples are found in literary pieces and in daily conversations.',
+        example: 'Then shall our names,<br>Familiar in his mouth as household words,<br>Harry the King, Bedford and Exeter,<br>Warwick and Talbot, Salisbury and Gloucester,<br>Be in their flowing cups freshly remembered',
+        misses: 0,
+        hits: 0
+      } // 9 more . . .
+    ],
+    count: 0
+  }
+
+  const reducer = (state = initialState, action) => {
+    // reducer code
+  }
+  ```
+
+  Run the linter, tests, etc. and check it out in the Dock. See how it's in our state? Now we have a starting point. Later we'll pull this in from the server API and we'll persist updates to the back end as well.

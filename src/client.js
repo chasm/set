@@ -12,7 +12,7 @@ import { Provider } from 'react-redux'
 import './theme/main.css'
 
 import { Home } from './components'
-import { App, Topic } from './containers'
+import { App, Counter, Topic } from './containers'
 
 import { reducer } from './redux/modules/reducer'
 
@@ -46,6 +46,7 @@ render(<Provider store={store}>
       <Route path='/' component={App}>
         <IndexRoute component={Home}/>
         <Route path='topic' component={Topic}/>
+        <Route path='counter' component={Counter}/>
       </Route>
     </Router>
     <DevTools/>

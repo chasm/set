@@ -21,6 +21,9 @@ const Header = () => <Navbar>
       <LinkContainer to={{ pathname: '/topic' }}>
         <NavItem eventKey={2} href='#'>Topic</NavItem>
       </LinkContainer>
+      <LinkContainer to={{ pathname: '/counter' }}>
+        <NavItem eventKey={3} href='#'>Counter</NavItem>
+      </LinkContainer>
     </Nav>
   </Navbar.Collapse>
 </Navbar>
