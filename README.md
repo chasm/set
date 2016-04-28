@@ -137,7 +137,7 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
 
   When we run this with `npm run server`, we should be able to access the JSON API at, for example, [http://localhost:3005/topics/1/cards/3](http://localhost:3005/topics/1/cards/3). Play around with it. Pretty neat, huh? And with a REST tool such as Postman or Paws, you can do POST, PUT, DELETE, etc. requests as well.
 
-5. We'll need a library with which to do AJAX&mdash;OK, AJAJ&mdash;too. jQuery is too heavy. We don't need all that stuff. [Superagent](https://github.com/visionmedia/superagent) is very nice. But [Axios](https://github.com/mzabriskie/axios) makes better use of JS promises, so let's use that:
+5. We'll need a library with which to do AJAX&mdash;OK, AJAJ (Asynchronous JavaScript and **JSON**)&mdash;too. jQuery is too heavy. We don't need all that stuff. [Superagent](https://github.com/visionmedia/superagent) is very nice. But [Axios](https://github.com/mzabriskie/axios) makes better use of JS promises, so let's use that:
 
   ```sh
   npm i -S axios
@@ -162,3 +162,180 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   Here is a basic IA diagram of our app as we currently intend to build it (we'll complicate it later, as is our wont):
 
   ![didactic doodle](./docs/ia.png)
+
+  First thing we'll need to do is to rename our pages. We can leave the Home page alone for now, but let's change `/app/components/about.jsx` to `/app/components/topic.jsx` and add a new file (we can just copy the code across for now and change the names) in `/app/components/card.jsx`:
+
+  ```jsx
+  // app/components/topic.jsx (formerly about.jsx)
+  import React from 'react'
+
+  import { Col, Row } from 'react-bootstrap'
+
+  const Topic = () => <Row>
+    <Col xs={12}>
+      <h1>Topic</h1>
+    </Col>
+  </Row>
+
+  export default Topic
+  ```
+
+
+  ```jsx
+  // app/components/topic.jsx (formerly about.jsx)
+  import React from 'react'
+
+  import { Col, Row } from 'react-bootstrap'
+
+  const Card = () => <Row>
+    <Col xs={12}>
+      <h1>Card</h1>
+    </Col>
+  </Row>
+
+  export default Card
+  ```
+
+  We'll also need to change the import in `/app/index.jsx` to Topic, and the routes as well:
+
+  ```jsx
+  // in app/index.jsx
+  import Topic from './components/topic.jsx'
+  ```
+
+  ```jsx
+  // in app/index.jsx
+  <Route path='topic' component={Topic}/>
+  ```
+
+  And the link in Header (we'll worry about adding the Card route later):
+
+  ```jsx
+  // in app/components/header.jsx
+  <LinkContainer to={{ pathname: '/topic' }}>
+    <NavItem eventKey={2} href='#'>Topic</NavItem>
+  </LinkContainer>
+  ```
+
+7. Before we move on to creating our app, let's finish setting up our actions and test our current reducer. Then we'll build on that. We'll begin by creating a button on the home page that will increment our counter. We can use a Bootstrap button and update the `/app/components/home.jsx` file like so:
+
+  ```js
+  // in app/components/home.jsx
+  import { Button, Col, Row } from 'react-bootstrap'
+
+  const Home = () => <Row>
+    <Col xs={12}>
+      <h1>Home</h1>
+      <Button>+</Button>
+    </Col>
+  </Row>
+  ```
+
+8. Next, we'll want a click of the button to dispatch an `INCREMENT` action to our Redux store. We're going to use the [Flux Standard Action](https://github.com/acdlite/flux-standard-action) (FSA) pattern. To do this, we'll use [redux-actions](https://github.com/acdlite/redux-actions), so let's begin by installing that module:
+
+  ```sh
+  npm i -S redux-actions
+  ```
+
+9. At this point, we need to stop to consider how we want to structure the file system for our app. There are two common approaches. One is to group files by function: components, reducers, actions, etc. The other approach is to group by modules, so all the files associated with, say, the Topic module would go in one folder called `topic`. This includes actions, components, etc.
+
+  The former setup is probably best for small- or medium-sized apps; the latter for large apps. As our app is fairly small, we'll go with a version of the former.
+
+  In our app folder let's create several new folders on the same level as the components folder, and we'll move files accordingly, and we'll add some `index.js` files to allow us to simplify imports. But first, to be consistent with the way others are doing this style, we'll rename our `app` folder to `src` (for "source").
+
+  ```sh
+  mv app src
+  mkdir src/components/header
+  mkdir src/components/home
+  touch src/components/index.js
+  mkdir src/containers
+  mkdir src/containers/app
+  mkdir src/containers/card
+  mkdir src/containers/topic
+  touch src/containers/index.js
+  mkdir src/helpers
+  touch src/helpers/index.js
+  mkdir src/redux
+  mkdir src/redux/middleware
+  mkdir src/redux/modules
+  mkdir src/theme
+  mkdir src/utils
+  touch src/utils/index.js
+  ```
+
+  Next we'll rename and move a few files. As much as I like using the `.jsx` extension to indicate React components, we'll switch to plain `.js` to simplify imports.
+
+  ```sh
+  mv src/index.jsx src/client.js
+  mv src/reducer.js src/redux/modules/reducer.js
+  mv src/main.css src/theme/main.css
+  mv src/components/app.jsx src/containers/app/app.js
+  mv src/components/card.jsx src/containers/card/card.js
+  mv src/components/header.jsx src/components/header/header.js
+  mv src/components/home.jsx src/components/home/home.js
+  mv src/components/topic.jsx src/containers/topic/topic.js
+  ```
+
+10. Next we'll need to fix our imports that are broken. Let's update our `index.js` files to make importing components, etc. a little easier. In `/src/components/index.js` put:
+
+  ```js
+  export Header from './header/header'
+  export Home from './home/home'
+  ```
+
+  In `/src/containers/index.js` put:
+
+  ```js
+  export App from './app/app'
+  export Card from './card/card'
+  export Topic from './topic/topic'
+  ```
+
+  In `/src/containers/app/app.js` change `import Header from './header.jsx'` to:
+
+  ```js
+  import { Header } from '../../components'
+  ```
+
+  See how this is going to work? The `index.js` file becomes a kind of shortcut to the individual components. Now in `/src/client.js` change this:
+
+  ```js
+  // THIS IS THE OLD VERSION
+  import './main.css'
+
+  import App from './components/app.jsx'
+  import Home from './components/home.jsx'
+  import About from './components/about.jsx'
+
+  import reducer from './reducer.js'
+  ```
+
+  to this:
+
+  ```js
+  import './theme/main.css'
+
+  import { Home } from './components'
+  import { App, Topic } from './containers'
+
+  import reducer from './redux/modules/reducer'
+  ```
+
+  It's a bit nicer, isn't it? We'll clean this up still more later.
+
+11. We also need to fix our `webpack.config.babel.js` file. Change this:
+
+  ```js
+  // THIS IS THE OLD VERSION
+  entry: {
+    app: PATHS.app
+  },
+  ```
+
+  to this:
+
+  ```js
+  entry: {
+    main: './app/client.js'
+  },
+  ```

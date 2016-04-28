@@ -14,7 +14,7 @@ const PATHS = {
 
 const common = {
   entry: {
-    app: PATHS.app
+    main: './app/client.js'
   },
   resolve: {
     extensions: [ '', '.js', '.jsx' ]
