@@ -856,3 +856,324 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   ```
 
   Run the linter, tests, etc. and check it out in the Dock. See how it's in our state? Now we have a starting point. Later we'll pull this in from the server API and we'll persist updates to the back end as well.
+
+22. Now we'll work on using this new state. We want to list all our topics on the home page, so we'll need to convert the Home component to a container. Let's move the folder over first:
+
+  ```sh
+  mv src/components/home src/containers/home
+  ```
+
+  Then we'll need to fix the imports. Remove `export { default as Home } from './home/home'` from `src/components/index.js` and add it to `src/containers/index.js`:
+
+  ```js
+  export { default as App } from './app/app'
+  export { default as Card } from './card/card'
+  export { default as Counter } from './counter/counter'
+  export { default as Home } from './home/home'
+  export { default as Topic } from './topic/topic'
+  ```
+
+  Then change `/src/clients.js` from this:
+
+  ```js
+  // THIS IS THE OLD VERSION
+  import { Home } from './components'
+  import { App, Card, Counter, Topic } from './containers'
+  ```
+
+  to this:
+
+  ```js
+  // in src/clients.js
+  import { App, Card, Counter, Home, Topic } from './containers'
+  ```
+
+23. Now we can convert the Home component to a container that will load the list of topics from the store. First, we'll need to add the `PropTypes` to our import. Then we'll import the Bootstrap `<Table/>` to use for listing our topics. We can grab the code from [react-bootstrap Table](https://react-bootstrap.github.io/components.html#tables) and strip it down for our use. Finally, we'll need `connect` from `react-redux`:
+
+  ```js
+  // in src/containers/home/home.js
+  import React, { PropTypes } from 'react'
+
+  import { Col, Row, Table } from 'react-bootstrap'
+
+  import { connect } from 'react-redux'
+  ```
+
+  We'll map our state to the props, mapping the `topics` array:
+
+  ```js
+  // in src/containers/home/home.js
+  const mapStateToProps = (state) => {
+    return {
+      topics: state.reducer.topics
+    }
+  }
+  ```
+
+  Then we'll import the props we need into the Home component, change the heading, and add the table to display the topics. For now, we'll just check the length of the array (should be 1) to make sure we're getting it.
+
+  ```js
+  // in src/containers/home/home.js
+  const Home = ({ topics, dispatch }) => <Row>
+    <Col xs={6}>
+      <h1>Topics</h1>
+
+      <Table striped bordered condensed hover>
+        <tbody>
+          <tr>
+            <td>{topics.length}</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Col>
+  </Row>
+  ```
+
+  We need to declare our `propTypes`:
+
+  ```js
+  // in src/containers/home/home.js
+  Home.propTypes = {
+    topics: PropTypes.array.isRequired,
+    dispatch: PropTypes.func.isRequired
+  }
+  ```
+
+  Then we can create our HomeContainer and export it:
+
+  ```js
+  // in src/containers/home/home.js
+  const HomeContainer = connect(mapStateToProps)(Home)
+
+  export default HomeContainer
+  ```
+
+  If we run the app and check the home page, we should see a table with `1` in a single row.
+
+24. Let's create a function to render our table rows. If you've taken one of my classes before, you know that I'm a big fan of [ramda.js](http://ramdajs.com/docs/). Let's install that to get the benefits. If you haven't used it, it's like lodash or underscore on steriods.
+
+  We'll import Ramda's `addIndex` and `map` functions, and we'll use the `addIndex` function to create our own `map` function that passes the index as well as the value:
+
+  ```js
+  // in src/containers/home/home.js
+  import { addIndex, map } from 'ramda'
+
+  const indexedMap = addIndex(map)
+  ```
+
+  Then we can create a render function that will run through the topics and return a row for each. Add the function, using the index as the `key` property for the row, and then update the component to use `renderRows`:
+
+  ```js
+  // in src/containers/home/home.js
+  const renderRows = (topics) => indexedMap((topic, idx) => <tr key={idx}>
+    <td>{topic.title}</td>
+  </tr>, topics)
+
+  const Home = ({ topics, dispatch }) => <Row>
+    <Col xs={6}>
+      <h1>Topics</h1>
+
+      <Table striped bordered condensed hover>
+        <tbody>{renderRows(topics)}</tbody>
+      </Table>
+    </Col>
+  </Row>
+  ```
+
+  That should work, but just to test it, let's update our `initialState` in our `/src/redux/modules/reducer.js` file to include a second topic:
+
+  ```js
+  // in src/redux/modules/reducer.js
+  topics: [
+    {
+      id: 1,
+      title: 'Literary Devices'
+    },
+    {
+      id: 2,
+      title: 'Famous Dogs'
+    }
+  ],
+  ```
+
+  Now we should see both topics.
+
+25. Let's make them links to the topic pages in question. We'll need to update the routes to handle the `topicId`. In the `/src/client.js` file. We'll nest the Card path and require a cardId as well, but we may need to change this.
+
+  ```jsx
+  // in src/client.js
+  <Router history={history}>
+    <Route path='/' component={App}>
+      <IndexRoute component={Home}/>
+      <Route path='topic/:topicId' component={Topic}>
+        <Route path='card/:cardId' component={Card}/>
+      </Route>
+      <Route path='counter' component={Counter}/>
+    </Route>
+  </Router>
+  ```
+
+  We're going to go to the topics from the Home page, so let's remove the link in the Header, too and change the `eventKey` of the Counter:
+
+  ```jsx
+  // in src/components/header/header.js
+  <Navbar.Collapse>
+    <Nav>
+      <IndexLinkContainer to={{ pathname: '/' }}>
+        <NavItem eventKey={1} href='#'>Home</NavItem>
+      </IndexLinkContainer>
+      <LinkContainer to={{ pathname: '/counter' }}>
+        <NavItem eventKey={2} href='#'>Counter</NavItem>
+      </LinkContainer>
+    </Nav>
+  </Navbar.Collapse>
+  ```
+
+26. Now let's update the Topic component to Display the topic title (for starters). Import the `connect` function and create the `mapStateToProps` function, add the props and `propTypes`, create the container, and export it. This should be getting to be second nature by now:
+
+  ```js
+  // in src/containers/topic/topic.js
+  import { connect } from 'react-redux'
+
+  const mapPropsToState = (state) => {
+    return {
+      topics: state.reducer.topics
+    }
+  }
+
+  const Topic = ({ topics, params, dispatch }) => {
+    return <Row>
+      <Col xs={12}>
+        <h1>Topic</h1>
+        <p>This is topic #{params.topicId}.</p>
+        <p>{JSON.stringify(topics)}</p>
+      </Col>
+    </Row>
+  }
+
+  Topic.propTypes = {
+    topics: PropTypes.array.isRequired,
+    params: PropTypes.object.isRequired,
+    dispatch: PropTypes.func.isRequired
+  }
+
+  const TopicContainer = connect(mapPropsToState)(Topic)
+
+  export default TopicContainer
+  ```
+
+  When we load the page, we should see our topics as an array. We'll need to find the right topic using that `params.topicId`. Ramda to the rescue! Let's import the Ramda `find` function. We'll need `propEq`, too ([propEq](http://ramdajs.com/docs/#propEq)):
+
+  ```js
+  // in src/containers/topic/topic.js
+  import { find, propEq } from 'ramda'
+  ```
+
+  We'll create our own finder function, and use it to get the correct topic. This is tricky! Remember that the `params.topicId` is coming from the URL, thus it is a *string*. We need an integer, so we'll need to use `parseInt` to cast it to one:
+
+  ```js
+  // in src/containers/topic/topic.js
+  const Topic = ({ topics, params, dispatch }) => {
+    const finder = find(propEq('id', parseInt(params.topicId, 10)))
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Topic</h1>
+        <p>This is topic #{params.topicId}.</p>
+        <p>{JSON.stringify(finder(topics))}</p>
+      </Col>
+    </Row>
+  }
+  ```
+
+  Now we should see the topic as a string. We'll want to display the title, so change the `<Col>` to:
+
+  ```js
+  // in src/containers/topic/topic.js
+    <Col xs={12}>
+      <h1>{finder(topics).title}</h1>
+    </Col>
+  ```
+
+  And we should see the title on the page if we go to [http://localhost:8080/topic/1](http://localhost:8080/topic/1).
+
+27. Let's make the rows in the table on the Home page link to the right Topic pages. We'll need to import the `Link` from `react-router`:
+
+  ```js
+  // in src/containers/home/home.js
+  import { Link } from 'react-router'
+  ```
+
+  Then we can update the table:
+
+  ```js
+  // in src/containers/home/home.js
+  const renderRows = (topics) => indexedMap((topic, idx) => {
+    const path = `/topic/${topic.id}`
+
+    return <tr key={idx}>
+      <td><Link to={path}>{topic.title}</Link></td>
+    </tr>
+  }, topics)
+  ```
+
+  Now when we check the Home page we can see that the topics are links to the Topic page.
+
+28. Let's list the cards on the Topic page. We'll import the Table, as with the home page, and do the same thing, but with Cards, each linking to a card page. To begin, we'll update the imports to include the Table, some more Ramda functions, and the Link from `react-router`, and we'll add our `indexedMap` function.
+
+  ```js
+  // in src/containers/topic/topic.js
+  import { Col, Row, Table } from 'react-bootstrap'
+
+  import { Link } from 'react-router'
+
+  import { addIndex, find, map, propEq } from 'ramda'
+
+  const indexedMap = addIndex(map)
+  ```
+
+  Then we'll update our Topic component and the `propTypes`:
+
+  ```js
+  // in src/containers/topic/topic.js
+  const Topic = ({ cards, topics, params, dispatch }) => {
+    const finder = find(propEq('id', parseInt(params.topicId, 10)))
+
+    return <Row>
+      <Col xs={12}>
+        <h1>{finder(topics).title}</h1>
+
+        <Table striped bordered condensed hover>
+          <tbody>{renderRows(cards)}</tbody>
+        </Table>
+      </Col>
+    </Row>
+  }
+
+  Topic.propTypes = {
+    cards: PropTypes.array.isRequired,
+    topics: PropTypes.array.isRequired,
+    params: PropTypes.object.isRequired,
+    dispatch: PropTypes.func.isRequired
+  }
+  ```
+
+  Finally, we'll add an updated `renderRows` function that works with cards and nested paths:
+
+  ```js
+  // in src/containers/topic/topic.js
+  const renderRows = (cards) => indexedMap((card, idx) => {
+    const path = `/topic/${card.topicId}/card/${card.id}`
+
+    return <tr key={idx}>
+      <td><Link to={path}>{card.word}</Link></td>
+    </tr>
+  }, cards)
+  ```
+
+  Test everything and it should work. On a Topic page you should see a list of words linking to a (future) Card page. There's just one problem: we show all the cards on every topic page. We need a filter. That's next.
+
+
+
+
+

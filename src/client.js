@@ -11,8 +11,7 @@ import { Provider } from 'react-redux'
 
 import './theme/main.css'
 
-import { Home } from './components'
-import { App, Counter, Topic } from './containers'
+import { App, Card, Counter, Home, Topic } from './containers'
 
 import { reducer } from './redux/modules/reducer'
 
@@ -43,7 +42,9 @@ render(<Provider store={store}>
     <Router history={history}>
       <Route path='/' component={App}>
         <IndexRoute component={Home}/>
-        <Route path='topic' component={Topic}/>
+        <Route path='topic/:topicId' component={Topic}>
+          <Route path='card/:cardId' component={Card}/>
+        </Route>
         <Route path='counter' component={Counter}/>
       </Route>
     </Router>

@@ -11,6 +11,10 @@ const initialState = {
     {
       id: 1,
       title: 'Literary Devices'
+    },
+    {
+      id: 2,
+      title: 'Famous Dogs'
     }
   ],
   cards: [
