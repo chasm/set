@@ -5,7 +5,7 @@ import { Grid } from 'react-bootstrap'
 import { Header } from '../../components'
 
 const App = ({ children }) => <div>
-  <Header/>
+  <Header />
   <Grid>{children}</Grid>
 </div>
 

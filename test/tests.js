@@ -5,23 +5,23 @@ import React from 'react'
 import chai, { expect } from 'chai'
 
 import chaiEnzyme from 'chai-enzyme'
-// import sinon from 'sinon'
 
 chai.use(chaiEnzyme())
 
 import { shallow } from 'enzyme'
+
 import { createStore } from 'redux'
 
 import { App } from '../src/containers'
 import { Header } from '../src/components'
 
-import { reducer } from '../src/redux/modules/reducer'
+import { reducer } from '../src/redux/modules/reducer.js'
 
 describe('<App/>', () => {
   it('includes the Header', () => {
-    const wrapper = shallow(<App><p/></App>)
+    const wrapper = shallow(<App><p /></App>)
 
-    expect(wrapper).to.contain(<Header/>)
+    expect(wrapper).to.contain(<Header />)
   })
 })
 

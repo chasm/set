@@ -2,10 +2,11 @@ import React, { PropTypes } from 'react'
 
 import { Col, Row, Table } from 'react-bootstrap'
 
-import { Link } from 'react-router'
-
 import { connect } from 'react-redux'
+
 import { addIndex, map } from 'ramda'
+
+import { Link } from 'react-router'
 
 const indexedMap = addIndex(map)
 
@@ -23,15 +24,19 @@ const renderRows = (topics) => indexedMap((topic, idx) => {
   </tr>
 }, topics)
 
-const Home = ({ topics, dispatch }) => <Row>
-  <Col xs={6}>
-    <h1>Topics</h1>
+const Home = ({ topics, dispatch }) => {
+  return <Row>
+    <Col xs={6}>
+      <h1>Topics</h1>
 
-    <Table striped bordered condensed hover>
-      <tbody>{renderRows(topics)}</tbody>
-    </Table>
-  </Col>
-</Row>
+      <Table striped bordered condensed hover>
+        <tbody>
+          {renderRows(topics)}
+        </tbody>
+      </Table>
+    </Col>
+  </Row>
+}
 
 Home.propTypes = {
   topics: PropTypes.array.isRequired,

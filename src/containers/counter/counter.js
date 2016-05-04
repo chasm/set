@@ -19,9 +19,19 @@ const Counter = ({ count, dispatch }) => {
   return <Row>
     <Col xs={12}>
       <h1>Counter</h1>
-      <Button onClick={incrementCount}>+</Button>
-      <p>The count is {count}.</p>
-      <Button onClick={decrementCount}>-</Button>
+      <div className='nums'>
+        <div className='num'>1</div>
+        <div className='num'>2</div>
+        <div className='num'>5</div>
+        <div className='num'>10</div>
+        <div className='num'>50</div>
+        <div className='num'>100</div>
+      </div>
+      <div className="zones">
+        <div className='dec'>minus</div>
+        <div className='count'>{count}</div>
+        <div className='inc'>plus</div>
+      </div>
     </Col>
   </Row>
 }

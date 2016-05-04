@@ -7,3 +7,59 @@ p {
   color: var(--red);
   padding: var(--large);
 }
+
+.nums {
+  clear: both;
+  height: 80px;
+  margin: 10px 0;
+  width: 480px;
+}
+
+.nums .num {
+  border: 1px solid blue;
+  border-radius: 20px;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  float: left;
+  font-size: 18px;
+  height: 40px;
+  line-height: 40px;
+  margin: 20px;
+  text-align: center;
+  width: 40px;
+}
+
+.zones {
+  clear: both;
+  height: 120px;
+  margin: 10px 0;
+  padding: 0;
+}
+
+.zones .count,
+.zones .dec,
+.zones .inc {
+  float: left;
+  font-size: 40px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+
+.zones .dec,
+.zones .inc {
+  color: white;
+  width: 180px;
+}
+
+.zones .count {
+  width: 120px;
+}
+
+.zones .dec {
+  background-color: red;
+}
+
+.zones .inc {
+  background-color: green;
+}

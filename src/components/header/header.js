@@ -8,7 +8,7 @@ const Header = () => <Navbar>
   <Navbar.Header>
     <Navbar.Brand>
       <IndexLinkContainer to={{ pathname: '/' }}>
-        <a>Didactic Doodle</a>
+        <a>Setup</a>
       </IndexLinkContainer>
     </Navbar.Brand>
     <Navbar.Toggle />

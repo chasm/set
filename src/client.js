@@ -11,9 +11,9 @@ import { Provider } from 'react-redux'
 
 import './theme/main.css'
 
-import { App, Card, Counter, Home, Topic } from './containers'
+import { App, Counter, Home, Topic } from './containers'
 
-import { reducer } from './redux/modules/reducer'
+import { reducer } from './redux/modules/reducer.js'
 
 const DevTools = createDevTools(
   <DockMonitor toggleVisibilityKey='ctrl-h' changePositionKey='ctrl-q'>
@@ -41,13 +41,11 @@ render(<Provider store={store}>
   <div>
     <Router history={history}>
       <Route path='/' component={App}>
-        <IndexRoute component={Home}/>
-        <Route path='topic/:topicId' component={Topic}>
-          <Route path='card/:cardId' component={Card}/>
-        </Route>
-        <Route path='counter' component={Counter}/>
+        <IndexRoute component={Home} />
+        <Route path='counter' component={Counter} />
+        <Route path='topic/:topicId' component={Topic} />
       </Route>
     </Router>
-    <DevTools/>
+    <DevTools />
   </div>
 </Provider>, div)

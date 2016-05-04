@@ -1,7 +1,7 @@
+import { createAction } from 'redux-actions'
+
 const INCREMENT = 'INCREMENT'
 const DECREMENT = 'DECREMENT'
-
-import { createAction } from 'redux-actions'
 
 const increment = createAction(INCREMENT)
 const decrement = createAction(DECREMENT)
