@@ -35,9 +35,9 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
     <div className='num'>100</div>
   </div>
   <div className="zones">
-    <div className='dec'>minus</div>
+    <div className='minus'>minus</div>
     <div className='count'>{count}</div>
-    <div className='inc'>plus</div>
+    <div className='plus'>plus</div>
   </div>
   ```
 
@@ -74,8 +74,8 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
   }
 
   .zones .count,
-  .zones .dec,
-  .zones .inc {
+  .zones .minus,
+  .zones .plus {
     float: left;
     font-size: 40px;
     height: 120px;
@@ -83,9 +83,10 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
     text-align: center;
   }
 
-  .zones .dec,
-  .zones .inc {
+  .zones .minus,
+  .zones .plus {
     color: white;
+    position: relative;
     width: 180px;
   }
 
@@ -93,11 +94,11 @@ Let's build a flash card app to begin. It seems to fit with our GitHub-inspired 
     width: 120px;
   }
 
-  .zones .dec {
+  .zones .minus {
     background-color: red;
   }
 
-  .zones .inc {
+  .zones .plus {
     background-color: green;
   }
   ```

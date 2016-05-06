@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions'
+import { fromJS } from 'immutable'
 
 const INCREMENT = 'INCREMENT'
 const DECREMENT = 'DECREMENT'
@@ -6,7 +7,7 @@ const DECREMENT = 'DECREMENT'
 const increment = createAction(INCREMENT)
 const decrement = createAction(DECREMENT)
 
-const initialState = {
+const initialState = fromJS({
   topics: [
     {
       id: 1,
@@ -110,20 +111,14 @@ const initialState = {
     }
   ],
   count: 0
-}
+})
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case INCREMENT:
-      return {
-        ...state,
-        count: state.count + (action.payload || 1)
-      }
+      return state.update('count', value => value + (action.payload || 1))
     case DECREMENT:
-      return {
-        ...state,
-        count: state.count - (action.payload || 1)
-      }
+      return state.update('count', value => value - (action.payload || 1))
     default:
       return state
   }

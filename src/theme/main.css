@@ -37,8 +37,8 @@ p {
 }
 
 .zones .count,
-.zones .dec,
-.zones .inc {
+.zones .minus,
+.zones .plus {
   float: left;
   font-size: 40px;
   height: 120px;
@@ -46,9 +46,10 @@ p {
   text-align: center;
 }
 
-.zones .dec,
-.zones .inc {
+.zones .minus,
+.zones .plus {
   color: white;
+  position: relative;
   width: 180px;
 }
 
@@ -56,10 +57,10 @@ p {
   width: 120px;
 }
 
-.zones .dec {
+.zones .minus {
   background-color: red;
 }
 
-.zones .inc {
+.zones .plus {
   background-color: green;
 }

@@ -35,7 +35,7 @@ describe('reducer', () => {
     store.dispatch(action)
     store.dispatch(action)
 
-    expect(store.getState().count).to.equal(3)
+    expect(store.getState().get('count')).to.equal(3)
   })
 
   it('increments the count when an DECREMENT action is dispatched', () => {
@@ -46,6 +46,6 @@ describe('reducer', () => {
     store.dispatch(action)
     store.dispatch(action)
 
-    expect(store.getState().count).to.equal(-3)
+    expect(store.getState().get('count')).to.equal(-3)
   })
 })

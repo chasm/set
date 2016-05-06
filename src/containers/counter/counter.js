@@ -1,10 +1,15 @@
-import React, { PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 
-import { Button, Col, Row } from 'react-bootstrap'
+import { Col, Row } from 'react-bootstrap'
+import { DragDropContext } from 'react-dnd'
+
+import HTML5Backend from 'react-dnd-html5-backend'
 
 import { connect } from 'react-redux'
 
-import { increment, decrement } from '../../redux/modules/reducer'
+// import { increment, decrement } from '../../redux/modules/reducer'
+
+import { Crement, Crementer } from '../../components'
 
 const mapStateToProps = (state) => {
   return {
@@ -12,28 +17,32 @@ const mapStateToProps = (state) => {
   }
 }
 
-const Counter = ({ count, dispatch }) => {
-  const incrementCount = () => dispatch(increment(10))
-  const decrementCount = () => dispatch(decrement(5))
+// const incrementCount = () => dispatch(increment(10))
+// const decrementCount = () => dispatch(decrement(5))
 
-  return <Row>
-    <Col xs={12}>
-      <h1>Counter</h1>
-      <div className='nums'>
-        <div className='num'>1</div>
-        <div className='num'>2</div>
-        <div className='num'>5</div>
-        <div className='num'>10</div>
-        <div className='num'>50</div>
-        <div className='num'>100</div>
-      </div>
-      <div className="zones">
-        <div className='dec'>minus</div>
-        <div className='count'>{count}</div>
-        <div className='inc'>plus</div>
-      </div>
-    </Col>
-  </Row>
+class Counter extends Component {
+  render () {
+    const { count } = this.props
+
+    return <Row>
+      <Col xs={12}>
+        <h1>Counter</h1>
+        <div className='nums'>
+          <Crement value={1} />
+          <Crement value={2} />
+          <Crement value={5} />
+          <Crement value={10} />
+          <Crement value={50} />
+          <Crement value={100} />
+        </div>
+        <div className='zones'>
+          <Crementer />
+          <div className='count'>{count}</div>
+          <Crementer isIncrementer />
+        </div>
+      </Col>
+    </Row>
+  }
 }
 
 Counter.propTypes = {
@@ -41,6 +50,6 @@ Counter.propTypes = {
   dispatch: PropTypes.func.isRequired
 }
 
-const CounterContainer = connect(mapStateToProps)(Counter)
+const CounterContainer = connect(mapStateToProps)(DragDropContext(HTML5Backend)(Counter))
 
 export default CounterContainer
