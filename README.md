@@ -1,5 +1,7 @@
 # React Redux Intermediate Class #3
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/chasm/set.svg)](https://greenkeeper.io/)
+
 This is an intermediate-level tutorial (tied in with a [Codementor.io course](https://www.codementor.io/classes)) that presumes that readers are proficient with JavaScript, have at least a passing familiarity with JavaScript 2015 syntax, and have done some basic work with React.js.
 
 Let's build a flash card app to begin. It seems to fit with our GitHub-inspired app name, *Didactic Doodle*.
